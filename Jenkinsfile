@@ -2,14 +2,12 @@ pipeline {
     agent any
 
     environment {
-        // Optionally set Python version or virtual environment directory
         VENV = 'venv'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout code from GitHub repo
                 git url: 'https://github.com/LaveezaBukhari/ci-cd-project.git', branch: 'main'
             }
         }
@@ -19,7 +17,7 @@ pipeline {
                 echo 'Setting up Python environment...'
                 sh '''
                     python3 -m venv $VENV
-                    source $VENV/bin/activate
+                    . $VENV/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
@@ -30,8 +28,7 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 sh '''
-                    source $VENV/bin/activate
-                    # Replace this with your test command
+                    . $VENV/bin/activate
                     pytest || echo "No tests defined"
                 '''
             }
@@ -40,10 +37,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying the application...'
-                // You can add your custom deployment steps here.
-                // For example, running the Flask app:
                 sh '''
-                    source $VENV/bin/activate
+                    . $VENV/bin/activate
                     nohup python3 app.py &
                 '''
             }
