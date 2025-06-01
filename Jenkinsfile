@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        // Optionally set Python version or virtual environment directory
+        VENV = 'venv'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -9,26 +14,38 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Setup Python Environment') {
             steps {
-                echo 'Building the project...'
-                // Add your actual build commands here
-                // Example for Node.js:
-                // sh 'npm install'
-                // sh 'npm run build'
+                echo 'Setting up Python environment...'
+                sh '''
+                    python3 -m venv $VENV
+                    source $VENV/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
+            }
+        }
 
-                // Example for Java (Maven):
-                // sh 'mvn clean package'
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                sh '''
+                    source $VENV/bin/activate
+                    # Replace this with your test command
+                    pytest || echo "No tests defined"
+                '''
             }
         }
 
         stage('Deploy') {
             steps {
                 echo 'Deploying the application...'
-                // Add your deployment commands here
-                // Example: copy files or restart service
-                // sh 'cp -r * /var/www/html/'
-                // sh 'sudo systemctl restart myapp'
+                // You can add your custom deployment steps here.
+                // For example, running the Flask app:
+                sh '''
+                    source $VENV/bin/activate
+                    nohup python3 app.py &
+                '''
             }
         }
     }
